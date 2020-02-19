@@ -36,7 +36,7 @@ namespace SQL_Escaner
                     {
 
                         string newWord = str[word];
-                        newWord = Regex.Replace(str[word], @"\s+", "_");
+                        newWord = Regex.Replace(str[word], @"\s+", "¤");
                         newWord = Regex.Replace(newWord, @"\'", "");
                         data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'•" + newWord + "'");
 
@@ -187,7 +187,7 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str, @"\>=")) { return new Token(str, 84, line, 8); }
             else if (Regex.IsMatch(str, @"\<=")) { return new Token(str, 85, line, 8); }
             else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, cons, line, 6, 61); } //CONSTANTES NUMERICAS
-            else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([_])", " "), cons, line, 6, 62); } //CONSTANTES ALFANUMERICAS
+            else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([¤])", " "), cons, line, 6, 62); } //CONSTANTES ALFANUMERICAS
             else if (Regex.IsMatch(str, @"^[A-Za-z _]\w*[#]?$")) { return new Token(str, id, line, 4); }  //IDENTIFICADORES
             //Regex.Replace(str, @"\'", "")
             return null;
