@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace SQL_Escaner
 {
@@ -28,11 +29,9 @@ namespace SQL_Escaner
         }
 
 
-
-
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.richTextBox1.Text += " ";
+           // this.richTextBox1.Text += "";
 
             foreach (DataGridViewColumn col in dgvTokens.Columns)
             {
@@ -84,32 +83,50 @@ namespace SQL_Escaner
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
-            string[] datos = richTextBox1.Lines;
-            Escaner scan = new Escaner(datos);
-            List<Token> words = scan.output();
 
-            foreach (Token token in words)
+            if (checkBox1.Checked)
             {
+                string[] datos = richTextBox1.Lines;
+                Escaner scan = new Escaner(datos);
+                List<Token> words = scan.output();
 
-                if (token.Tipo == 1)
+                foreach (Token token in words)
                 {
-                    Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(40, 51, 250));
-                }
-                else if (token.Tipo == 4)
-                {
-                    Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(88, 199, 158));
-                }
-                else if (token.Value >= 61 || token.Codigo == 54)
-                {
-                    Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(219, 206, 13));
 
+
+
+                    if (token.Value >= 61 || token.Dato == "'")
+                    {
+                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(219, 206, 13));
+
+                    }
+                    else if (token.Tipo == 4)
+                    {
+                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(88, 199, 158));
+                    }
+                    else if (token.Tipo == 1)
+                    {
+                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(40, 51, 250));
+                    }
+                    else
+                    {
+                        Console.WriteLine(token.Dato);
+                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(222, 222, 222));
+
+                    }
                 }
-                else
+                foreach (Token error in scan.errores())
                 {
-                    Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(222, 222, 222));
+                    Utility.HighlightText(richTextBox1, error.Dato, Color.Red);
 
                 }
             }
+            else
+            {
+               
+                    
+            }
+
         }
 
         private void metroButton1_Click_1(object sender, EventArgs e)
@@ -128,11 +145,14 @@ namespace SQL_Escaner
         }
         private void button1_Click_1(object sender, EventArgs e)
         {
+
+            
+
             dgvTokens.Rows.Clear();
             gridCons.Rows.Clear();
             gridErr.Rows.Clear();
             gridId.Rows.Clear();
-
+            List<string> check = new List<string>();
             int number = 0;
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
@@ -151,10 +171,16 @@ namespace SQL_Escaner
                         refs +=lines + ",";
                     }
                     refs = refs.Remove(refs.Length - 1);
-                        gridId.Rows.Add(token.Dato, token.Codigo,refs);
 
-                }else if (token.Value>=61)
+                    if(!check.Contains(token.Dato))
+                        gridId.Rows.Add(token.Dato, token.Codigo, refs);
+
+                    check.Add(token.Dato);
+
+
+                }else if (token.Value==61||token.Value == 62)
                 {
+                    if(Regex.IsMatch(token.Dato,@"\d+"))
                     dato = "CONSTANTE";
                     gridCons.Rows.Add(number,token.Dato,token.Value,token.Codigo);
 
@@ -165,17 +191,48 @@ namespace SQL_Escaner
             }
             if (scan.errores().Count() < 1)
             {
-                gridErr.Rows.Add("", "", "Sin error");
+                gridErr.Rows.Add("", "100",  "Sin error");
             }
             else
                 foreach (Token error in scan.errores())
                 {
                     if (error.Tipo == -1)
-                        gridErr.Rows.Add(1, 101, "Error en línea " + error.Linea + " Símbolo desconocido: " + error.Dato);
+                        gridErr.Rows.Add(1, 102, "Error en línea " + error.Linea + " Elemento inválido: " + error.Dato);
                     else
-                        gridErr.Rows.Add(1, 102, "Error en línea " + error.Linea + "Elemento inválido: " + error.Dato);
+                        gridErr.Rows.Add(1, 101, "Error en línea " + error.Linea + " Símbolo desconocido: " + error.Dato);
 
                 }
+
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            dgvTokens.Rows.Clear();
+            gridCons.Rows.Clear();
+            gridErr.Rows.Clear();
+            gridId.Rows.Clear();
+            richTextBox1.Text = "";
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            
+
+        }
+
+        private void checkBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (!checkBox1.Checked)
+            {
+                richTextBox1.Select(0, richTextBox1.Text.Length);
+                richTextBox1.SelectionColor = System.Drawing.Color.FromArgb(222, 222, 222);
+            }
+            else
+            {
+                richTextBox1.Text += "";
+            }
+            
         }
     }
     static class Utility
@@ -198,7 +255,7 @@ namespace SQL_Escaner
 
             myRtb.SelectionStart = s_start;
             myRtb.SelectionLength = 0;
-            myRtb.SelectionColor = Color.Black;
+            //myRtb.SelectionColor = Color.Black;
         }
     }
 }

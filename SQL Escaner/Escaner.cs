@@ -14,7 +14,6 @@ namespace SQL_Escaner
         private int id, cons;
         private List<Token> error;
         private List<Token> tokens;
-        private List<int> lineas;
         public Escaner(string[] data)
         {
             this.data = data;
@@ -22,32 +21,35 @@ namespace SQL_Escaner
             this.cons = 600;
             error = new List<Token>();
             tokens = new List<Token>();
-            lineas = new List<int>();
         }
+
 
         private void format()
         {
+            string[] str;
             for (int line = 0; line < data.Length; line++)
             {
-                string[] str = Regex.Split(data[line], @"(\'.*?\')");
+                str = Regex.Split(data[line], @"(\'.*?\')");
                 for (int word = 0; word < str.Length; word++)
                 {
-                    if (Regex.IsMatch(str[word], @"\'.+?\'"))
+                    if (Regex.IsMatch(str[word], @"\'.*?\'"))
                     {
-                        //Console.WriteLine( Regex.Replace(str[word], @"\ ", "¤"));
-           
-                        str[word] = Regex.Replace(str[word], @"\'", "");
+
                         string newWord = str[word];
-                        newWord = Regex.Replace(str[word], @"\s+", "¤");
+                        newWord = Regex.Replace(str[word], @"\s+", "_");
+                        newWord = Regex.Replace(newWord, @"\'", "");
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'•" + newWord + "'");
 
-                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'~" + newWord + "~'");
-                        Console.WriteLine(data[line]);
                     }
-
                 }
+
             }
 
         }
+
+
+
+
         public List<Token> output()
         {
             this.format();
@@ -55,19 +57,20 @@ namespace SQL_Escaner
             {
                 //Console.WriteLine(data[line]);
                 int line = i + 1;
-                // string[] str = Regex.Split(data[i], @"(\w+|\~.*?\~|\')");
-                    
-                string[] str = Regex.Split(data[i], @"(\w+[#]?|\~.*?\~|\')");
-                //string[] str = Regex.Split(data[i], @"([a-zA-Z]*.?(\w+)?|\~.*?\~|\')");
+                //string[] str = Regex.Split(data[i], @"(\w+|\~.*?\~|\')");
+
+                // string[] str = Regex.Split(data[i], @"(\¶.*?\¶|\~.*?\~|\'|\(|\)|\d+|\¬)");
+                //string[] str = Regex.Split(data[i], @"(\w+|\~.*?\~|\')");
+                string[] str = Regex.Split(data[i], @"(\s+|\,|\.|\(|\)|\'|\;)");
                 for (int word = 0; word < str.Length; word++)
                 {
-                    
+                    // Console.WriteLine(str[word]);
                     str[word] = Regex.Replace(str[word], @"\s+", "");
                     if (str[word] != "")
                     {
 
                         Token token = this.typeOf(str[word], line);
-                        lineas.Add(line);
+
                         if (exist(str[word]))
                         {
                             token = getExistent(str[word]);
@@ -88,6 +91,8 @@ namespace SQL_Escaner
                         }
                     }
                 }
+
+
             }
 
             return this.tokens;
@@ -114,18 +119,22 @@ namespace SQL_Escaner
 
         private void addError(string str, int line)
         {
-            if (Regex.IsMatch(str, @"\w*")) //ERROR DE ELEMENTO
+
+            if (Regex.IsMatch(str, @"\w+"))//ERROR DE ELEMENTO
             {
                 this.error.Add(new Token(str, 0, line, -1));
+
             }
             else
             {
-                string[] chars = Regex.Split(str, @"([\[ \]!@#$%^&*(),.?:{}|])"); //ERROR DE SIMBOLO
+                string[] chars = Regex.Split(str, @""); //ERROR DE SIMBOLO
                 for (int i = 0; i < chars.Length; i++)
                 {
-                    this.error.Add(new Token(chars[i], 0, line, -2));
+                    if (chars[i] != "" && chars[i] != " ")
+                        this.error.Add(new Token(chars[i], 0, line, -2));
                 }
             }
+
 
 
         }
@@ -169,9 +178,9 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str, @"^\=$")) { return new Token(str, 83, line, 8); }
             else if (Regex.IsMatch(str, @"\>=")) { return new Token(str, 84, line, 8); }
             else if (Regex.IsMatch(str, @"\<=")) { return new Token(str, 85, line, 8); }
-            else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, cons, line, 6,61); } //CONSTANTES NUMERICAS
-            else if (Regex.IsMatch(str, @"^(\~.*?\~)$")) { str = Regex.Replace(str, @"\¤"," "); return new Token(Regex.Replace(str, @"\~", ""), cons, line, 6,62); } //CONSTANTES ALFANUMERICAS
-            else if (Regex.IsMatch(str, @"^\w+[#]?$")) { return new Token(str, id, line, 4); }  //IDENTIFICADORES
+            else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, cons, line, 6, 61); } //CONSTANTES NUMERICAS
+            else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([_])", " "), cons, line, 6, 62); } //CONSTANTES ALFANUMERICAS
+            else if (Regex.IsMatch(str, @"^[A-Za-z]\w*[#]?$")) { return new Token(str, id, line, 4); }  //IDENTIFICADORES
             //Regex.Replace(str, @"\'", "")
             return null;
         }
