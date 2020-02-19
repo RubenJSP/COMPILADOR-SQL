@@ -48,6 +48,8 @@ namespace SQL_Escaner
         }
 
 
+      
+
 
 
         public List<Token> output()
@@ -55,49 +57,55 @@ namespace SQL_Escaner
             this.format();
             for (int i = 0; i < data.Length; i++)
             {
-                //Console.WriteLine(data[line]);
-                int line = i + 1;
-                //string[] str = Regex.Split(data[i], @"(\w+|\~.*?\~|\')");
-
-                // string[] str = Regex.Split(data[i], @"(\¶.*?\¶|\~.*?\~|\'|\(|\)|\d+|\¬)");
-                //string[] str = Regex.Split(data[i], @"(\w+|\~.*?\~|\')");
-                string[] str = Regex.Split(data[i], @"(\s+|\,|\.|\(|\)|\'|\;)");
+                string[] str = Regex.Split(data[i], @"(\s+|\,|\(|\)|\'|\;)");
                 for (int word = 0; word < str.Length; word++)
                 {
-                    // Console.WriteLine(str[word]);
                     str[word] = Regex.Replace(str[word], @"\s+", "");
+                  
                     if (str[word] != "")
                     {
 
-                        Token token = this.typeOf(str[word], line);
+                        if (Regex.IsMatch(str[word], @"^[A-Za-z_]+\w*.")) //Si es de tipo ID.ID
+                        {
+                            string[] temp = Regex.Split(str[word], @"(\.)");
+                            for (int j = 0; j < temp.Length; j++)
+                            {
+                                this.add(temp[j],i+1);
+                            }
+                            continue;
+                        }
 
-                        if (exist(str[word]))
-                        {
-                            token = getExistent(str[word]);
-                            token.addRef(line);
-                            tokens.Add(new Token(str[word], token.Codigo, line, token.Tipo));
-                        }
-                        else if (token != null)
-                        {
-                            if (token.Tipo == 6) cons++;
-                            else if (token.Tipo == 4) id++;
-
-                            tokens.Add(token);
-                        }
-                        else
-                        {
-                            addError(str[word], line);
-                            return this.tokens;
-                        }
+                       this.add(str[word],i+1);
+                        if (error.Count > 0) return this.tokens;  
+                     
                     }
                 }
-
-
             }
 
             return this.tokens;
         }
+        public void add(string word,int line)
+        {
+            Token token = this.typeOf(word, line);
 
+            if (exist(word))
+            {
+                token = getExistent(word);
+                token.addRef(line);
+                tokens.Add(new Token(word, token.Codigo, line, token.Tipo));
+            }
+            else if (token != null)
+            {
+                if (token.Tipo == 6) cons++;
+                else if (token.Tipo == 4) id++;
+
+                this.tokens.Add(token);
+            }
+            else
+            {
+                addError(word, line);
+            }
+        }
         private bool exist(string str)
         {
             foreach (Token data in this.tokens)
@@ -180,7 +188,7 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str, @"\<=")) { return new Token(str, 85, line, 8); }
             else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, cons, line, 6, 61); } //CONSTANTES NUMERICAS
             else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([_])", " "), cons, line, 6, 62); } //CONSTANTES ALFANUMERICAS
-            else if (Regex.IsMatch(str, @"^[A-Za-z]\w*[#]?$")) { return new Token(str, id, line, 4); }  //IDENTIFICADORES
+            else if (Regex.IsMatch(str, @"^[A-Za-z _]\w*[#]?$")) { return new Token(str, id, line, 4); }  //IDENTIFICADORES
             //Regex.Replace(str, @"\'", "")
             return null;
         }
