@@ -24,21 +24,23 @@ namespace SQL_Escaner
         }
 
 
+        //Aqui se formatean las cadenas de tipo 'palabra plabra'
         private void format()
         {
             string[] str;
             for (int line = 0; line < data.Length; line++)
             {
-                str = Regex.Split(data[line], @"(\'.*?\')");
+                str = Regex.Split(data[line], @"(\'.*?\')"); // Se hace split con cualquier palabra que esté entre comillas
                 for (int word = 0; word < str.Length; word++)
                 {
-                    if (Regex.IsMatch(str[word], @"\'.*?\'"))
+                    if (Regex.IsMatch(str[word], @"\'.*?\'"))  //Hace match con las palabras que tengan comillas
                     {
 
                         string newWord = str[word];
-                        newWord = Regex.Replace(str[word], @"\s+", "¤");
-                        newWord = Regex.Replace(newWord, @"\'", "");
-                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'•" + newWord + "'");
+                        newWord = Regex.Replace(str[word], @"\s+", "¤"); //Se reemplazan los espacios por ese caracter
+                        newWord = Regex.Replace(newWord, @"\'", ""); //eliminamos las comillas
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'•" + newWord + "'"); //formateamos el texto de salida en su 
+                        //linea correspondiente 'palabra¤palabra'
 
                     }
                 }
@@ -46,10 +48,6 @@ namespace SQL_Escaner
             }
 
         }
-
-
-      
-
 
 
         public List<Token> output()
@@ -57,56 +55,56 @@ namespace SQL_Escaner
             this.format();
             for (int i = 0; i < data.Length; i++)
             {
-                string[] str = Regex.Split(data[i], @"(\s+|\,|\(|\)|\'|\;)");
+                string[] str = Regex.Split(data[i], @"(\s+|\,|\(|\)|\'|\;)"); //Hace split con esas coincidencias
                 for (int word = 0; word < str.Length; word++)
                 {
                     str[word] = Regex.Replace(str[word], @"\s+", "");
-                  
+
                     if (str[word] != "")
                     {
 
                         if (Regex.IsMatch(str[word], @"^[A-Za-z_]+\w*.")) //Si es de tipo ID.ID
                         {
-                            string[] temp = Regex.Split(str[word], @"(\.)");
+                            string[] temp = Regex.Split(str[word], @"(\.)"); //Hace split en . para separa los identificadores
                             for (int j = 0; j < temp.Length; j++)
                             {
-                                this.add(temp[j],i+1);
+                                this.add(temp[j], i + 1); //Añade los tokens a la lista
                             }
                             continue;
                         }
 
-                       this.add(str[word],i+1);
-                        if (error.Count > 0) return this.tokens;  
-                     
+                        this.add(str[word], i + 1); //Se añade el resto de tokens a la lista
+                        if (error.Count > 0) return this.tokens; //Si existe un error en la lista de errores, entonces se regresa la lista de tokens y se detiene el análisis
+
                     }
                 }
             }
 
             return this.tokens;
         }
-        public void add(string word,int line)
+        public void add(string word, int line) //Este metodo añade los tokens a la lista de tokens
         {
             Token token = this.typeOf(word, line);
 
-            if (exist(word))
+            if (exist(word)) //verifica si el token ya existe en la lista
             {
-                token = getExistent(word);
-                token.addRef(line);
-                tokens.Add(new Token(word, token.Codigo, line, token.Tipo));
+                token = getExistent(word); //retorna el token existente en la lista
+                token.addRef(line); //Se añade la línea a las referencis del token existente
+                tokens.Add(new Token(word, token.Codigo, line, token.Tipo)); //Se crea un nuevo token con el mismo valor y linea del encontrado
             }
-            else if (token != null)
+            else if (token != null) //En caso de que no exista el token
             {
-                if (token.Tipo == 6) cons++;
-                else if (token.Tipo == 4) id++;
+                if (token.Tipo == 6) cons++; //Si es constante
+                else if (token.Tipo == 4) id++; //si es identificador
 
-                this.tokens.Add(token);
+                this.tokens.Add(token); //Se añade a la lista de tokens
             }
             else
             {
-                addError(word, line);
+                addError(word, line);  //Aquí se añaden los errores en caso de existir alguno
             }
         }
-        private bool exist(string str)
+        private bool exist(string str) //verifica  si un token existe
         {
             foreach (Token data in this.tokens)
             {
@@ -115,7 +113,7 @@ namespace SQL_Escaner
             }
             return false;
         }
-        private Token getExistent(string str)
+        private Token getExistent(string str) //retorna un token existente en la lista
         {
             foreach (Token data in this.tokens)
             {
@@ -125,7 +123,7 @@ namespace SQL_Escaner
             return null;
         }
 
-        private void addError(string str, int line)
+        private void addError(string str, int line) //Añade los errores encontrados a la lista de errores
         {
 
             if (Regex.IsMatch(str, @"\w+"))//ERROR DE ELEMENTO
@@ -193,7 +191,7 @@ namespace SQL_Escaner
             return null;
         }
 
-        public List<Token> errores()
+        public List<Token> errores() //retorna la lista de errores
         {
             return this.error;
         }
