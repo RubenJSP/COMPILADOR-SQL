@@ -74,6 +74,7 @@ namespace SQL_Escaner
                 {
                     x = producciones.Pop();
                     k = tokens[pointer].Codigo;
+                    Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
 
                     if (isTerminal(x) ||x == 199)
                     {
@@ -81,7 +82,6 @@ namespace SQL_Escaner
                             pointer++;
                         else
                         {
-                            Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
 
                             break;
                         }       

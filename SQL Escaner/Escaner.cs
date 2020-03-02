@@ -39,7 +39,7 @@ namespace SQL_Escaner
                         string newWord = str[word];
                         newWord = Regex.Replace(str[word], @"\s+", "¤"); //Se reemplazan los espacios por ese caracter
                         newWord = Regex.Replace(newWord, @"\'", ""); //eliminamos las comillas
-                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "'•" + newWord + "'"); //formateamos el texto de salida en su 
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "  '•" + newWord + "' "); //formateamos el texto de salida en su 
                         //linea correspondiente 'palabra¤palabra'
 
                     }
@@ -59,7 +59,7 @@ namespace SQL_Escaner
             this.format();
             for (int i = 0; i < data.Length; i++)
             {
-                string[] str = Regex.Split(data[i], @"(\s+|\,|\(|\)|\'|\;)"); //Hace split con esas coincidencias
+                string[] str = Regex.Split(data[i], @"(\s+|\,|\(|\)|\')"); //Hace split con esas coincidencias
                 for (int word = 0; word < str.Length; word++)
                 {
                     str[word] = Regex.Replace(str[word], @"\s+", "");
@@ -178,7 +178,7 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str, @"^\($")) { return new Token(str, 52, line, 5); }
             else if (Regex.IsMatch(str, @"^\)$")) { return new Token(str, 53, line, 5); }
             else if (Regex.IsMatch(str, @"^\'$")) { return new Token(str, 54, line, 5); }
-            else if (Regex.IsMatch(str, @";$")) { return new Token(";", 55, line, 5); }
+            //else if (Regex.IsMatch(str, @";$")) { return new Token(";", 55, line, 5); }
             else if (Regex.IsMatch(str, @"^\+$")) { return new Token(str, 70, line, 7); } //OPERADORES
             else if (Regex.IsMatch(str, @"^\-$")) { return new Token(str, 71, line, 7); }
             else if (Regex.IsMatch(str, @"^\*$")) { return new Token(str, 72, line, 7); }
