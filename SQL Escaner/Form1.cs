@@ -134,61 +134,24 @@ namespace SQL_Escaner
 
         }
 
-        public bool existInGrid(DataGridView dat, string value)
-        {
-            foreach (DataGridView row  in dat.Rows)
-            {
-
-            }
-
-            return false;
-        }
         private void button1_Click_1(object sender, EventArgs e)
         {
 
-            
 
             dgvTokens.Rows.Clear();
             gridCons.Rows.Clear();
             gridErr.Rows.Clear();
             gridId.Rows.Clear();
-            List<string> check = new List<string>();
-            int number = 0;
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
             tokens = scan.output();
-            foreach (Token token in tokens)
+            Parser p = new Parser(datos);
+            Console.WriteLine(p.analyze());
+            foreach (Token i in tokens)
             {
-
-                number++;
-                string dato = token.Dato;
-                if (token.Tipo == 4)
-                {
-                    string refs = "";
-
-                    foreach (int lines in token.references())
-                    {
-                        refs +=lines + ",";
-                    }
-                    refs = refs.Remove(refs.Length - 1);
-
-                    if(!check.Contains(token.Dato))
-                        gridId.Rows.Add(token.Dato, token.Codigo, refs);
-
-                    check.Add(token.Dato);
-
-
-                }else if (token.Value==61||token.Value == 62)
-                {
-                    if(Regex.IsMatch(token.Dato,@"\d+"))
-                    dato = "CONSTANTE";
-                    gridCons.Rows.Add(number,token.Dato,token.Value,token.Codigo);
-
-                }
-                
-                dgvTokens.Rows.Add(number, token.Linea, dato, token.Tipo, token.Codigo);
-
+                dgvTokens.Rows.Add("",i.Codigo,i.Dato,"");
             }
+            /*
             if (scan.errores().Count() < 1)
             {
                 gridErr.Rows.Add("", "100",  "Sin error");
@@ -201,7 +164,7 @@ namespace SQL_Escaner
                     else
                         gridErr.Rows.Add(1, 101, "Error en línea " + error.Linea + " Símbolo desconocido: " + error.Dato);
 
-                }
+                }*/
 
 
         }
