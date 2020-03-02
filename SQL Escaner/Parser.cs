@@ -53,8 +53,10 @@ namespace SQL_Escaner
         {
             int k = getTerminal(terminal);
             int index = x % 300;
-
-            return rules[index, k];
+            if (k != -1)
+                return rules[index, k];
+            else
+                return "0";
         }
 
         public bool analyze()

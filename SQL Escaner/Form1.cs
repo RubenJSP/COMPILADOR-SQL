@@ -33,29 +33,7 @@ namespace SQL_Escaner
         {
            // this.richTextBox1.Text += "";
 
-            foreach (DataGridViewColumn col in dgvTokens.Columns)
-            {
-                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.HeaderCell.Style.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Bold, GraphicsUnit.Pixel);
-                col.HeaderCell.Style.ForeColor = Color.White;
-                col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            }
-            foreach (DataGridViewColumn col in gridCons.Columns)
-            {
-                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.HeaderCell.Style.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Bold, GraphicsUnit.Pixel);
-                col.HeaderCell.Style.ForeColor = Color.White;
-
-                col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            }
-            foreach (DataGridViewColumn col in gridId.Columns)
-            {
-                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.HeaderCell.Style.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Bold, GraphicsUnit.Pixel);
-                col.HeaderCell.Style.ForeColor = Color.White;
-
-                col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            }
+          
             foreach (DataGridViewColumn col in gridErr.Columns)
             {
                 col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -65,10 +43,8 @@ namespace SQL_Escaner
                 col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             }
 
-            gridId.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             gridErr.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            gridCons.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dgvTokens.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
         }
 
         private void metroButton1_Click(object sender, EventArgs e)
@@ -137,20 +113,14 @@ namespace SQL_Escaner
         private void button1_Click_1(object sender, EventArgs e)
         {
 
-
-            dgvTokens.Rows.Clear();
-            gridCons.Rows.Clear();
             gridErr.Rows.Clear();
-            gridId.Rows.Clear();
+
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
             tokens = scan.output();
             Parser p = new Parser(datos);
             Console.WriteLine(p.analyze());
-            foreach (Token i in tokens)
-            {
-                dgvTokens.Rows.Add("",i.Codigo,i.Dato,"");
-            }
+           
             /*
             if (scan.errores().Count() < 1)
             {
@@ -171,10 +141,8 @@ namespace SQL_Escaner
 
         private void button2_Click(object sender, EventArgs e)
         {
-            dgvTokens.Rows.Clear();
-            gridCons.Rows.Clear();
             gridErr.Rows.Clear();
-            gridId.Rows.Clear();
+
             richTextBox1.Text = "";
         }
 
