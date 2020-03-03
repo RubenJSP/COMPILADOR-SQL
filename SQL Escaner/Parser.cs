@@ -44,8 +44,32 @@ namespace SQL_Escaner
         
         }
 
-        private void error()
+        private void error(int x,int k ,int line)
         {
+            if (x >= 300)
+            {
+                Console.WriteLine( "x: " + x + " k: " + k);
+                if(x==305 && (k==54||k==61))
+                    Console.WriteLine("Operador relacional");
+                else if(x==305&&k==52)
+                    Console.WriteLine("Palabra reservada");
+                else if (x == 300 || x == 310 || x == 312 || x == 317)
+                    Console.WriteLine("Palabra reservada " + line);
+                else if (x == 301 || x == 302 || x == 304 || x == 305 || x == 306 || x == 308 || x == 309 || x == 311 || x == 313 || (x==316 && k==4))
+                    Console.WriteLine("Identificador " + line);
+                else if (x == 303||x==307)
+                    Console.WriteLine("Delimitador");
+                else if (x == 314)
+                    Console.WriteLine("Operador relacional");
+                else if (x == 318 || x == 319|| x==316)
+                    Console.WriteLine("Constante");
+            }
+            else
+            {
+                Console.WriteLine("Delimitador");
+            }
+
+
 
         }
 
@@ -76,7 +100,7 @@ namespace SQL_Escaner
                 {
                     x = producciones.Pop();
                     k = tokens[pointer].Codigo;
-                    Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
+                    //Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
 
                     if (isTerminal(x) ||x == 199)
                     {
@@ -84,7 +108,8 @@ namespace SQL_Escaner
                             pointer++;
                         else
                         {
-
+                            Console.WriteLine("T");
+                            error(x,k,tokens[pointer].Linea);
                             break;
                         }       
                     }
@@ -101,7 +126,8 @@ namespace SQL_Escaner
                         }
                         else
                         {
-                            Console.WriteLine(" 2 X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
+                            Console.WriteLine("P " + x);
+                            error(x,k, tokens[pointer].Linea);
 
                             break;
                         }

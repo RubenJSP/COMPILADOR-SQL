@@ -35,7 +35,6 @@ namespace SQL_Escaner
                 {
                     if (Regex.IsMatch(str[word], @"\'.*?\'"))  //Hace match con las palabras que tengan comillas
                     {
-
                         string newWord = str[word];
                         newWord = Regex.Replace(str[word], @"\s+", "¤"); //Se reemplazan los espacios por ese caracter
                         newWord = Regex.Replace(newWord, @"\'", ""); //eliminamos las comillas
@@ -46,6 +45,29 @@ namespace SQL_Escaner
                 }
 
             }
+            for (int line = 0; line < data.Length; line++)
+            {
+                str = Regex.Split(data[line], @"\s+"); 
+                for (int word = 0; word < str.Length; word++)
+                {
+
+                    if (Regex.IsMatch(str[word], @"(\'.*?\w+\s?$)")) 
+                    {
+
+                        string newWord = str[word];
+                        newWord = Regex.Replace(newWord, @"\'", "");
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "  '•" + newWord);
+                    }
+                    else if (Regex.IsMatch(str[word], @"^\w+\'"))
+                    {
+                        string newWord = str[word];
+                        this.error.Add(new Token(str[word], 0, line+1, -1));
+
+                    }
+                }
+
+            }
+
 
         }
 
@@ -67,7 +89,7 @@ namespace SQL_Escaner
                     if (str[word] != "")
                     {
 
-                        if (Regex.IsMatch(str[word], @"^[A-Za-z_]+\w*.")) //Si es de tipo ID.ID
+                        if (Regex.IsMatch(str[word], @"^[A-Za-z_]+\.(\w+)[#]?")) //Si es de tipo ID.ID
                         {
                             string[] temp = Regex.Split(str[word], @"(\.)"); //Hace split en . para separa los identificadores
                             for (int j = 0; j < temp.Length; j++)

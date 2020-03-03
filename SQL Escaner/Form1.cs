@@ -112,14 +112,17 @@ namespace SQL_Escaner
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-
             gridErr.Rows.Clear();
-
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
             tokens = scan.output();
-            Parser p = new Parser(datos);
-            Console.WriteLine(p.analyze());
+            foreach (Token i in tokens)
+            {
+                Console.WriteLine(i.Dato);
+
+            }
+            // Parser p = new Parser(datos);
+             //Console.WriteLine((p.analyze())? "Todo salió bien :) TQM":"El Query está mal, como todo en tu vida");
            
             /*
             if (scan.errores().Count() < 1)
