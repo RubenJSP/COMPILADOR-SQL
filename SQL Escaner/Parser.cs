@@ -12,13 +12,13 @@ namespace SQL_Escaner
         private List<Token> tokens;
         private string[,] rules;
         private Stack<int> producciones;
-        private Escaner scan;
-        private List<string> errores;
+        public Escaner scan;
+        public List<Token> errores;
         public Parser(string[] data)
         {
             scan = new Escaner(data);
             producciones = new Stack<int>();
-            errores = new List<string>();
+            errores = new List<Token>();
             rules = new string[,]  {
                 {"0","0","10 301 11 306 310","0","0","0","0","0","0","0","0","0","0","0","0","0" },
                 {"302","0","0","0","0","0","0","0","0","0","0","0","0","0","72","0" },
@@ -48,29 +48,30 @@ namespace SQL_Escaner
         {
             if (x >= 300)
             {
-                Console.WriteLine( "x: " + x + " k: " + k);
-                if(x==305 && (k==54||k==61))
-                    Console.WriteLine("Operador relacional");
-                else if(x==305&&k==52)
-                    Console.WriteLine("Palabra reservada");
+                if (x == 305 && (k == 4 || k == 62))
+                    this.errores.Add(new Token("Se esperaba delimitador",205,line,2));
+                else if (x == 316 && (k == 62||k==53))
+                    this.errores.Add(new Token("Se esperaba delimitador",205,line,2));
+                else if (x == 305 && (k == 54 || k == 61))
+                    this.errores.Add(new Token("Se esperaba operador relacional", 208, line, 2));
+                else if (x == 305 && k == 52)
+                    this.errores.Add(new Token("Se esperaba palabra reservada", 201, line, 2));
                 else if (x == 300 || x == 310 || x == 312 || x == 317)
-                    Console.WriteLine("Palabra reservada " + line);
-                else if (x == 301 || x == 302 || x == 304 || x == 305 || x == 306 || x == 308 || x == 309 || x == 311 || x == 313 || (x==316 && k==4))
-                    Console.WriteLine("Identificador " + line);
-                else if (x == 303||x==307)
-                    Console.WriteLine("Delimitador");
+                    this.errores.Add(new Token("Se esperaba palabra reservada", 201, line, 2));
+                else if (x == 301 || x == 302 || x == 304 || x == 305 || x == 306 || x == 308 || x == 309 || x == 311 || x == 313 || (x == 316 && k == 4))
+                    this.errores.Add(new Token("Se esperaba identificador", 204, line, 2));
+                else if (x == 303 || x == 307)
+                    this.errores.Add(new Token("Se esperaba delimitador", 205, line, 2));
                 else if (x == 314)
-                    Console.WriteLine("Operador relacional");
-                else if (x == 318 || x == 319|| x==316)
-                    Console.WriteLine("Constante");
+                    this.errores.Add(new Token("Se esperaba operador relacional", 208, line, 2));
+                else if (x == 318 || x == 319 || x == 316)
+                    this.errores.Add(new Token("Se esperaba constante", 206, line, 2));
             }
             else
             {
-                Console.WriteLine("Delimitador");
+                this.errores.Add(new Token("Se esperaba delimitadorx", 205, line, 2));
             }
-
-
-
+        
         }
 
         private string getProduccion(int x, int terminal)
@@ -100,7 +101,7 @@ namespace SQL_Escaner
                 {
                     x = producciones.Pop();
                     k = tokens[pointer].Codigo;
-                    //Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
+                    Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
 
                     if (isTerminal(x) ||x == 199)
                     {
@@ -108,9 +109,9 @@ namespace SQL_Escaner
                             pointer++;
                         else
                         {
-                            Console.WriteLine("T");
+                            Console.WriteLine("L: "  + tokens[pointer].Linea + " K: " + k + " P: " + pointer);
                             error(x,k,tokens[pointer].Linea);
-                            break;
+                            return false;
                         }       
                     }
                     else
@@ -126,10 +127,11 @@ namespace SQL_Escaner
                         }
                         else
                         {
-                            Console.WriteLine("P " + x);
+                            //Console.WriteLine(": X: " + x + " K: " + k);
+
                             error(x,k, tokens[pointer].Linea);
 
-                            break;
+                            return false;
                         }
                     }
 
@@ -140,9 +142,6 @@ namespace SQL_Escaner
             }
             else
             {
-                Console.WriteLine("Error lexico");
-
-                errores.Add("Error lexico");
                 return false;
             }
 

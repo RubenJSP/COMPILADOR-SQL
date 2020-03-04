@@ -121,23 +121,38 @@ namespace SQL_Escaner
                 Console.WriteLine(i.Dato);
 
             }
-            // Parser p = new Parser(datos);
-             //Console.WriteLine((p.analyze())? "Todo salió bien :) TQM":"El Query está mal, como todo en tu vida");
-           
-            /*
-            if (scan.errores().Count() < 1)
+             Parser parser = new Parser(datos);
+            //Console.WriteLine((parser.analyze())? "Todo salió bien :) TQM":"El Query está mal, como todo en tu vida");
+
+
+            if (parser.analyze())
             {
-                gridErr.Rows.Add("", "100",  "Sin error");
+                gridErr.Rows.Add("", "100", "Sin error");
+                gridErr.Rows.Add("", "200", "Sin error");
             }
             else
-                foreach (Token error in scan.errores())
-                {
-                    if (error.Tipo == -1)
-                        gridErr.Rows.Add(1, 102, "Error en línea " + error.Linea + " Elemento inválido: " + error.Dato);
-                    else
-                        gridErr.Rows.Add(1, 101, "Error en línea " + error.Linea + " Símbolo desconocido: " + error.Dato);
+            {
 
-                }*/
+                if (parser.scan.errores().Count > 0)
+                    foreach (Token error in parser.scan.errores())
+                    {
+                        if (error.Tipo == -1)
+                            gridErr.Rows.Add(1, 102, "Error en línea " + error.Linea + " Elemento inválido: " + error.Dato);
+                        else
+                            gridErr.Rows.Add(1, 101, "Error en línea " + error.Linea + " Símbolo desconocido: " + error.Dato);
+
+                    }
+                else
+                {
+                    gridErr.Rows.Add("", "100", "Sin error");
+                    foreach (Token error in parser.errores)
+                    {
+
+                        gridErr.Rows.Add("2", error.Codigo, "Error en línea: " + error.Linea + " " + error.Dato);
+
+                    }
+                }
+            }
 
 
         }

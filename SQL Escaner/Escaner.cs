@@ -28,8 +28,11 @@ namespace SQL_Escaner
         private void format()
         {
             string[] str;
+            
             for (int line = 0; line < data.Length; line++)
             {
+                data[line] = Regex.Replace(data[line], @"\(", " ( ");
+                data[line] = Regex.Replace(data[line], @"\)", " ) ");
                 str = Regex.Split(data[line], @"(\'.*?\')"); // Se hace split con cualquier palabra que esté entre comillas
                 for (int word = 0; word < str.Length; word++)
                 {
@@ -38,7 +41,7 @@ namespace SQL_Escaner
                         string newWord = str[word];
                         newWord = Regex.Replace(str[word], @"\s+", "¤"); //Se reemplazan los espacios por ese caracter
                         newWord = Regex.Replace(newWord, @"\'", ""); //eliminamos las comillas
-                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "  '•" + newWord + "' "); //formateamos el texto de salida en su 
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "   '•" + newWord + "'  "); //formateamos el texto de salida en su 
                         //linea correspondiente 'palabra¤palabra'
 
                     }
@@ -61,7 +64,10 @@ namespace SQL_Escaner
                     else if (Regex.IsMatch(str[word], @"^\w+\'"))
                     {
                         string newWord = str[word];
-                        this.error.Add(new Token(str[word], 0, line+1, -1));
+                        //this.error.Add(new Token(str[word], 0, line+1, -1));
+                        newWord = Regex.Replace(newWord, @"\'", "");
+                        data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "  •" + newWord + "'  ");
+
 
                     }
                 }
@@ -88,10 +94,10 @@ namespace SQL_Escaner
 
                     if (str[word] != "")
                     {
-
+                        string[] temp;
                         if (Regex.IsMatch(str[word], @"^[A-Za-z_]+\.(\w+)[#]?")) //Si es de tipo ID.ID
                         {
-                            string[] temp = Regex.Split(str[word], @"(\.)"); //Hace split en . para separa los identificadores
+                            temp = Regex.Split(str[word], @"(\.)"); //Hace split en . para separa los identificadores
                             for (int j = 0; j < temp.Length; j++)
                             {
                                 this.add(temp[j], i + 1); //Añade los tokens a la lista
