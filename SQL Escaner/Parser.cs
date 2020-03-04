@@ -69,7 +69,7 @@ namespace SQL_Escaner
             }
             else
             {
-                this.errores.Add(new Token("Se esperaba delimitadorx", 205, line, 2));
+                this.errores.Add(new Token("Se esperaba delimitador", 205, line, 2));
             }
         
         }
@@ -101,16 +101,18 @@ namespace SQL_Escaner
                 {
                     x = producciones.Pop();
                     k = tokens[pointer].Codigo;
-                    Console.WriteLine(" X: " + x + " K: " + k + " pointer: " + tokens[pointer].Dato);
+                   // Console.WriteLine("LINE: "  pointer: " + pointer);
 
-                    if (isTerminal(x) ||x == 199)
+                    if (isTerminal(x) || x == 199)
                     {
                         if (x == k)
                             pointer++;
                         else
                         {
-                            Console.WriteLine("L: "  + tokens[pointer].Linea + " K: " + k + " P: " + pointer);
-                            error(x,k,tokens[pointer].Linea);
+                            int line = tokens[pointer].Linea;
+                            if (tokens[pointer].Codigo == 199)
+                                line = tokens[pointer - 1].Linea;
+                            error(x,k,line);
                             return false;
                         }       
                     }
