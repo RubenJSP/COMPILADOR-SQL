@@ -9,7 +9,7 @@ namespace SQL_Escaner
 {
     class Parser
     {
-        private List<Token> tokens;
+#pragma warning disable CS0169 // El campo 'Parser.tokens' nunca se usa#pragma warning restore CS0169 // El campo 'Parser.tokens' nunca se usa
         private string[,] rules;
         private Stack<int> producciones;
         public Escaner scan;

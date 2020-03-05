@@ -18,7 +18,6 @@ C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\bin\Debug\SQL Escaner.pdb
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\bin\Debug\MetroFramework.Design.dll
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\bin\Debug\MetroFramework.dll
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\bin\Debug\MetroFramework.Fonts.dll
-C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.csprojAssemblyReference.cache
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL_Escaner.Form1.resources
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL_Escaner.Properties.Resources.resources
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.csproj.GenerateResource.cache
