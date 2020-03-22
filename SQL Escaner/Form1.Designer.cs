@@ -58,7 +58,7 @@
             this.richTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(222)))), ((int)(((byte)(222)))));
             this.richTextBox1.Location = new System.Drawing.Point(9, 66);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(1266, 477);
+            this.richTextBox1.Size = new System.Drawing.Size(1266, 719);
             this.richTextBox1.TabIndex = 2;
             this.richTextBox1.Text = "SELECT *\nFROM PROFESORES\nWHERE EDAD > 45 AND GRADO=\'MAE\'";
             this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
@@ -68,7 +68,7 @@
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(198)))), ((int)(((byte)(247)))));
             this.panel1.Location = new System.Drawing.Point(6, 63);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1272, 483);
+            this.panel1.Size = new System.Drawing.Size(1272, 725);
             this.panel1.TabIndex = 3;
             // 
             // gridErr
@@ -104,7 +104,7 @@
             this.gridErr.EnableHeadersVisualStyles = false;
             this.gridErr.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.gridErr.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(17)))), ((int)(((byte)(17)))));
-            this.gridErr.Location = new System.Drawing.Point(6, 552);
+            this.gridErr.Location = new System.Drawing.Point(6, 791);
             this.gridErr.Name = "gridErr";
             this.gridErr.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -118,7 +118,7 @@
             this.gridErr.RowHeadersVisible = false;
             this.gridErr.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.gridErr.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gridErr.Size = new System.Drawing.Size(1272, 358);
+            this.gridErr.Size = new System.Drawing.Size(1272, 119);
             this.gridErr.TabIndex = 6;
             this.gridErr.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.gridErr.UseStyleColors = true;
@@ -183,6 +183,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(1284, 933);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.button2);
@@ -190,6 +191,7 @@
             this.Controls.Add(this.gridErr);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.panel1);
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "SQL PARSER";
             this.Load += new System.EventHandler(this.Form1_Load);

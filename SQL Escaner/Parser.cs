@@ -9,7 +9,6 @@ namespace SQL_Escaner
 {
     class Parser
     {
-#pragma warning disable CS0169 // El campo 'Parser.tokens' nunca se usa#pragma warning restore CS0169 // El campo 'Parser.tokens' nunca se usa
         private string[,] rules;
         private Stack<int> producciones;
         public Escaner scan;
@@ -44,6 +43,7 @@ namespace SQL_Escaner
         
         }
 
+        //SELECT  FROM TABLA
         private void error(int x,int k ,int line)
         {
             if (x >= 300)
@@ -101,7 +101,6 @@ namespace SQL_Escaner
                 {
                     x = producciones.Pop();
                     k = tokens[pointer].Codigo;
-                   // Console.WriteLine("LINE: "  pointer: " + pointer);
 
                     if (isTerminal(x) || x == 199)
                     {

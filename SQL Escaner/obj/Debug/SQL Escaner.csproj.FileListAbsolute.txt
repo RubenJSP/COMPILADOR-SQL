@@ -25,3 +25,4 @@ C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.cspr
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.csproj.CopyComplete
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.exe
 C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.pdb
+C:\Users\Jasa\source\repos\COMPILADOR-SQL\SQL Escaner\obj\Debug\SQL Escaner.csprojAssemblyReference.cache
