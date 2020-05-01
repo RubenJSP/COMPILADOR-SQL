@@ -36,7 +36,8 @@ namespace SQL_Escaner
                 data[line] = Regex.Replace(data[line], @"(?<=\w|\#)\=", " = ");
                 data[line] = Regex.Replace(data[line], @">=", " >= ");
                 data[line] = Regex.Replace(data[line], @"<=", " <= ");
-     
+                data[line] = Regex.Replace(data[line], @",", " , ");
+
 
                 str = Regex.Split(data[line], @"(\'.*?\')"); // Se hace split con cualquier palabra que esté entre comillas
                 for (int word = 0; word < str.Length; word++)
@@ -45,7 +46,9 @@ namespace SQL_Escaner
                     {
                         string newWord = str[word];
                         newWord = Regex.Replace(str[word], @"\s+", "¤"); //Se reemplazan los espacios por ese caracter
+                        newWord = Regex.Replace(newWord, @"\,", "");
                         newWord = Regex.Replace(newWord, @"\'", ""); //eliminamos las comillas
+
                         data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "   '•" + newWord + "'  "); //formateamos el texto de salida en su 
                         //linea correspondiente 'palabra¤palabra'
 
@@ -69,7 +72,6 @@ namespace SQL_Escaner
                     else if (Regex.IsMatch(str[word], @"^\w+\'"))
                     {
                         string newWord = str[word];
-                        //this.error.Add(new Token(str[word], 0, line+1, -1));
                         newWord = Regex.Replace(newWord, @"\'", "");
                         data[line] = Regex.Replace(data[line], @"(?:^|\W)" + Regex.Escape(str[word]) + @"(?:$|\W)", "  •" + newWord + "'  ");
 
@@ -203,7 +205,7 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str.ToUpper(), @"^REFERENCES$")) { return new Token(str, 26, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^INSERT$")) { return new Token(str, 27, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^INTO$")) { return new Token(str, 28, line, 1); }
-            else if (Regex.IsMatch(str.ToUpper(), @"^VALUES$")) { return new Token(str, 23, line, 1); }
+            else if (Regex.IsMatch(str.ToUpper(), @"^VALUES$")) { return new Token(str, 29, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^GO$")) { return new Token(str, 30, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^PROCEDURE$")) { return new Token(str, 31, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^CREATE$")) { return new Token(str, 16, line, 1); }
@@ -225,14 +227,14 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str, @"^\-$")) { return new Token(str, 71, line, 7); }
             else if (Regex.IsMatch(str, @"^\*$")) { return new Token(str, 72, line, 7); }
             else if (Regex.IsMatch(str, @"^\/$")) { return new Token(str, 73, line, 7); }
-            else if (Regex.IsMatch(str, @"^\>$")) { return new Token(str, 81, line, 8); } //OPERADORES RELACIONALES
-            else if (Regex.IsMatch(str, @"^\<$")) { return new Token(str, 82, line, 8); }
-            else if (Regex.IsMatch(str, @"^\=$")) { return new Token(str, 83, line, 8); }
-            else if (Regex.IsMatch(str, @"\>=")) { return new Token(str, 84, line, 8); }
-            else if (Regex.IsMatch(str, @"\<=")) { return new Token(str, 85, line, 8); }
-            else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, cons, line, 6, 61); } //CONSTANTES NUMERICAS
-            else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([¤])", " "), cons, line, 6, 62); } //CONSTANTES ALFANUMERICAS
-            else if (Regex.IsMatch(str, @"^[@]?[A-Za-z _]\w*[#]?$")) { return new Token(str, id, line, 4); } //IDENTIFICADORES
+            else if (Regex.IsMatch(str, @"^\>$")) { return new Token(str, 8, line, 81); } //OPERADORES RELACIONALES
+            else if (Regex.IsMatch(str, @"^\<$")) { return new Token(str, 8, line, 82); }
+            else if (Regex.IsMatch(str, @"^\=$")) { return new Token(str, 8, line, 83); }
+            else if (Regex.IsMatch(str, @"\>=")) { return new Token(str, 8, line, 84); }
+            else if (Regex.IsMatch(str, @"\<=")) { return new Token(str, 8, line, 85); }
+            else if (Regex.IsMatch(str, @"^\d*([\.\,])?\d+$|^\d+[\.\,]?\d+$")) { return new Token(str, 61, line, 6, cons); } //CONSTANTES NUMERICAS
+            else if (Regex.IsMatch(str, @"^\•")) { str = Regex.Replace(str, @"\•", ""); return new Token(Regex.Replace(str, @"([¤])", " "), 62, line, 6, cons); } //CONSTANTES ALFANUMERICAS  
+            else if (Regex.IsMatch(str, @"^[@]?[A-Za-z _]\w*[#]?$")) { return new Token(str, 4, line, id); } //IDENTIFICADORES
             return null;
         }
 

@@ -116,11 +116,13 @@ namespace SQL_Escaner
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
             tokens = scan.output();
-            foreach (Token i in tokens)
+            Semantic s = new Semantic(tokens);
+            s.print();
+            /*foreach (Token i in tokens)
             {
-                Console.WriteLine(i.Dato);
+                Console.WriteLine(i.Dato + " " + i.Codigo);
 
-            }
+            }*/
              Parser parser = new Parser(datos);
             //Console.WriteLine((parser.analyze())? "Todo salió bien :) TQM":"El Query está mal, como todo en tu vida");
 

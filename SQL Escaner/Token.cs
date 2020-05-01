@@ -42,7 +42,7 @@ namespace SQL_Escaner
 
         public List<int> references()
         {
-            List<int> lines =referencias.Distinct().ToList();
+            List<int> lines = referencias.Distinct().ToList();
             lines.Sort();
             return lines;
         }
