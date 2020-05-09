@@ -129,19 +129,4 @@
   <metadata name="Column15.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="richTextBox1.Text" xml:space="preserve">
-    <value>CREATE TABLE DEPARTAMENTOS(
-D# CHAR(2) NOT NULL,
-DNOMBRE CHAR(6) NOT NULL,
-CONSTRAINT PK_DEPARTAMENTOS PRIMARY KEY (D#));
-
-CREATE TABLE CARRERAS(
-C# CHAR(2) NOT NULL,
-CNOMBRE CHAR(3) NOT NULL,
-VIGENCIA CHAR(4) NOT NULL,
-SEMESTRES NUMERIC(2) NOT NULL,
-D# CHAR(2) NOT NULL,
-CONSTRAINT PK_CARRERAS PRIMARY KEY (C#),
-CONSTRAINT FK_CARRERAS FOREIGN KEY (D#) REFERENCES DEPARTAMENTOS(D#));</value>
-  </data>
 </root>

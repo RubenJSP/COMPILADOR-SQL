@@ -184,7 +184,7 @@ namespace SQL_Escaner
 
         }
 
-        public Token typeOf(string str, int line) //REGRESA LOS TOKENS SEGUN LA CADENA DE ENTRADA 
+        public Token typeOf(string str, int line) 
         {
             if (Regex.IsMatch(str.ToUpper(), @"^SELECT$")) { return new Token(str, 10, line, 1); } //PALABRAS RESERVADAS
             else if (Regex.IsMatch(str.ToUpper(), @"^FROM$")) { return new Token(str, 11, line, 1); }

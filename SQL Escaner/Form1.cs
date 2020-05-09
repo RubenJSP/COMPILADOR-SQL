@@ -8,19 +8,82 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Data.SqlClient;
 
 namespace SQL_Escaner
 {
     
     public partial class Form1 : MetroFramework.Forms.MetroForm
     {
+        Semantic tablasSemanticas;
         List<Token> tokens;
+        string conection = "Data Source=GECKO;Initial Catalog=INSCRITOS;Integrated Security=True";
+        string tablas = @"CREATE TABLE DEPARTAMENTOS(
+                            D# CHAR(2) NOT NULL,
+                            DNOMBRE CHAR(6) NOT NULL
+                            CONSTRAINT PK_DEPARTAMENTOS PRIMARY KEY(D#));
+                            CREATE TABLE CARRERAS(
+                            C# CHAR(2) NOT NULL,
+                            CNOMBRE CHAR(3) NOT NULL,
+                            VIGENCIA CHAR(4) NOT NULL,
+                            SEMESTRES NUMERIC(2) NOT NULL,
+                            D# CHAR(2) NOT NULL,
+                            CONSTRAINT PK_CARRERAS PRIMARY KEY(C#),
+                            CONSTRAINT FK_CARRERAS FOREIGN KEY (D#) REFERENCES DEPARTAMENTOS(D#));
+                            CREATE TABLE ALUMNOS(
+                            A# CHAR(2) NOT NULL,
+                            ANOMBRE CHAR(20) NOT NULL,
+                            GENERACION CHAR(4) NOT NULL,
+                            SEXO CHAR(1) NOT NULL,
+                            C# CHAR(2) NOT NULL,
+                            CONSTRAINT PK_ALUMNOS PRIMARY KEY(A#),
+                            CONSTRAINT FK_ALUMNOS FOREIGN KEY(C#)REFERENCES CARRERAS(C#));
+                            CREATE TABLE MATERIAS(
+                            M# CHAR(2) NOT NULL,
+                            MNOMBRE CHAR(6) NOT NULL,
+                            CREDITOS NUMERIC(2) NOT NULL,
+                            C# CHAR(2) NOT NULL,
+                            CONSTRAINT PK_MATERIAS PRIMARY KEY(M#),
+                            CONSTRAINT FK_MATERIAS FOREIGN KEY (C#) REFERENCES CARRERAS(C#));
+                            CREATE TABLE PROFESORES(
+                            P# CHAR(2) NOT NULL,
+                            PNOMBRE CHAR(20) NOT NULL,
+                            EDAD NUMERIC(2) NOT NULL,
+                            SEXO CHAR(1)NOT NULL,
+                            ESP CHAR(4) NOT NULL,
+                            GRADO CHAR(3) NOT NULL,
+                            D# CHAR(2) NOT NULL,
+                            CONSTRAINT PK_PROFESORES PRIMARY KEY(P#),
+                            CONSTRAINT FK_PROFESORES FOREIGN KEY (D#) REFERENCES DEPARTAMENTOS(D#));
+                            CREATE TABLE INSCRITOS(
+                            R# CHAR(3) NOT NULL,
+                            A# CHAR(2) NOT NULL,
+                            M# CHAR(2) NOT NULL,
+                            P# CHAR(2) NOT NULL,
+                            TURNO CHAR(1) NOT NULL,
+                            SEMESTRE CHAR(6) NOT NULL,
+                            CALIFICACION NUMERIC(3) NOT NULL,
+                            CONSTRAINT PK_INSCRITOS PRIMARY KEY(R#),
+                            CONSTRAINT FK_INSCRITOS_01 FOREIGN KEY (A#) REFERENCES ALUMNOS(A#),
+                            CONSTRAINT FK_INSCRITOS_02 FOREIGN KEY (M#) REFERENCES MATERIAS(M#),
+                            CONSTRAINT FK_INSCRITOS_03 FOREIGN KEY (P#) REFERENCES PROFESORES(P#));";
         public Form1()
         {
 
             InitializeComponent();
             this.StyleManager = styleMang;
             styleMang.Theme = MetroFramework.MetroThemeStyle.Dark;
+          
+        }
+
+        public void load()
+        {
+            string[] datos = tablas.Split();
+            Escaner data = new Escaner(datos);
+            List<Token> items = new List<Token>();
+            items = data.output();
+            tablasSemanticas = new Semantic(items);
+            tablasSemanticas.print();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -60,48 +123,7 @@ namespace SQL_Escaner
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
 
-            if (checkBox1.Checked)
-            {
-                string[] datos = richTextBox1.Lines;
-                Escaner scan = new Escaner(datos);
-                List<Token> words = scan.output();
-
-                foreach (Token token in words)
-                {
-
-
-
-                    if (token.Value >= 61 || token.Dato == "'")
-                    {
-                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(219, 206, 13));
-
-                    }
-                    else if (token.Tipo == 4)
-                    {
-                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(88, 199, 158));
-                    }
-                    else if (token.Tipo == 1)
-                    {
-                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(40, 51, 250));
-                    }
-                    else
-                    {
-                        Console.WriteLine(token.Dato);
-                        Utility.HighlightText(richTextBox1, token.Dato, System.Drawing.Color.FromArgb(222, 222, 222));
-
-                    }
-                }
-                foreach (Token error in scan.errores())
-                {
-                    Utility.HighlightText(richTextBox1, error.Dato, Color.Red);
-
-                }
-            }
-            else
-            {
-               
-                    
-            }
+          
 
         }
 
@@ -112,18 +134,21 @@ namespace SQL_Escaner
 
         private void button1_Click_1(object sender, EventArgs e)
         {
+            load();
             gridErr.Rows.Clear();
             string[] datos = richTextBox1.Lines;
             Escaner scan = new Escaner(datos);
             tokens = scan.output();
-            Semantic s = new Semantic(tokens);
-            s.print();
+            tablasSemanticas.dml = tokens;
             /*foreach (Token i in tokens)
             {
                 Console.WriteLine(i.Dato + " " + i.Codigo);
 
             }*/
-             Parser parser = new Parser(datos);
+            Parser parser = new Parser(datos);
+            parser.scan = scan;
+            parser.tokens = tokens;
+            parser.semantica = tablasSemanticas;
             //Console.WriteLine((parser.analyze())? "Todo salió bien :) TQM":"El Query está mal, como todo en tu vida");
 
 
@@ -131,6 +156,24 @@ namespace SQL_Escaner
             {
                 gridErr.Rows.Add("", "100", "Sin error");
                 gridErr.Rows.Add("", "200", "Sin error");
+                /*SqlConnection conectar = new SqlConnection(conection);
+                conectar.Open();
+                if(conectar.State == System.Data.ConnectionState.Open)
+                {
+                    try
+                    {
+                        string query = richTextBox1.Text;
+                        SqlCommand cmd = new SqlCommand(query, conectar);
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("Listo");
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex);
+
+                    }
+                }*/
+
             }
             else
             {
@@ -166,25 +209,12 @@ namespace SQL_Escaner
             richTextBox1.Text = "";
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            
-
-        }
-
         private void checkBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!checkBox1.Checked)
-            {
-                richTextBox1.Select(0, richTextBox1.Text.Length);
-                richTextBox1.SelectionColor = System.Drawing.Color.FromArgb(222, 222, 222);
-            }
-            else
-            {
-                richTextBox1.Text += "";
-            }
+           
             
         }
+
     }
     static class Utility
     {
