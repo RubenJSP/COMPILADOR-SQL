@@ -253,16 +253,13 @@ namespace SQL_Escaner
         {
             Token table = dml[dml.IndexOf(item) - 2];
             string tableName = tableAlias(table);
-            Console.WriteLine("I< " + item.Dato);
             if (tableName != null)
                 table.Dato = tableName;
-            Console.WriteLine("I> " + table.Dato);
             if ((tablas.Nombre.Contains(table.Dato)) && tableIsDeclared(table))
             {
                 int tableIndex = tablas.Nombre.IndexOf(table.Dato);
                 if (findKey(tableIndex, item.Dato.ToUpper()) != -1)
                 {
-                    //comparar.Add(item);
                     return null;
                 }
 
@@ -283,9 +280,24 @@ namespace SQL_Escaner
             return null;
 
         }
+        public string getType(Token table,Token item)
+        {
+            int tableIndex = tablas.Nombre.IndexOf(table.Dato);
+            int itemIndex = findKey(tableIndex,item.Dato);
+            if (itemIndex != -1)
+                return atributos.Tipo[itemIndex];
+
+            return null;
+        }
 
         public Token compararTipos(Token item)
         {
+            bool isLeftTable = (dml[dml.IndexOf(item) - 2].Dato == ".") ? true : false;
+            Token table = dml[dml.IndexOf(item) + 1];
+            Token right = (tablas.Nombre.Contains(table.Dato)) ? dml[dml.IndexOf(item) + 3] : table;
+            Token left = dml[dml.IndexOf(item) - 1];
+            string leftType = getType(dml[dml.IndexOf(item) - 3],left);
+            Console.WriteLine(left.Dato + "( " + leftType + ") " + item.Dato + " " + right.Dato + " " + isLeftTable);
 
             return null;
         }
@@ -376,7 +388,7 @@ namespace SQL_Escaner
                 case 703:
                     return validaTablaAtributo(token);
                 case 704:
-                    return null;
+                    return compararTipos(token);
                 default:
                     return null;
             }
