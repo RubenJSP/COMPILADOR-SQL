@@ -83,7 +83,8 @@ namespace SQL_Escaner
             List<Token> items = new List<Token>();
             items = data.output();
             tablasSemanticas = new Semantic(items);
-            tablasSemanticas.print();
+            tablasSemanticas.fill();
+            //tablasSemanticas.print();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -154,8 +155,9 @@ namespace SQL_Escaner
 
             if (parser.analyze())
             {
-                gridErr.Rows.Add("", "100", "Sin error");
-                gridErr.Rows.Add("", "200", "Sin error");
+                gridErr.Rows.Add("1", "100", "Sin error");
+                gridErr.Rows.Add("2", "200", "Sin error");
+                gridErr.Rows.Add("3", "300", "Sin error");
                 /*SqlConnection conectar = new SqlConnection(conection);
                 conectar.Open();
                 if(conectar.State == System.Data.ConnectionState.Open)
@@ -189,11 +191,19 @@ namespace SQL_Escaner
                     }
                 else
                 {
-                    gridErr.Rows.Add("", "100", "Sin error");
+                    gridErr.Rows.Add("1", "100", "Sin error");
                     foreach (Token error in parser.errores)
                     {
+                        if (error.Codigo > 300)
+                        {
+                            gridErr.Rows.Add("2", "200", "Sin error");
+                            gridErr.Rows.Add("3", error.Codigo, "Error en línea: " + error.Linea + " " + error.Dato);
+                        }
+                        else
+                        {
+                            gridErr.Rows.Add("2", error.Codigo, "Error en línea: " + error.Linea + " " + error.Dato);
 
-                        gridErr.Rows.Add("2", error.Codigo, "Error en línea: " + error.Linea + " " + error.Dato);
+                        }
 
                     }
                 }

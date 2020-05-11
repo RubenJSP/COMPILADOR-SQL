@@ -3,19 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace SQL_Escaner
 {
     class Semantic
     {
+        public struct Alias
+        {
+            public string alias;
+            public string table;
+            public Alias(string a, string t)
+            {
+                this.alias = a;
+                this.table = t;
+            }
+        }
+        public struct Atrib
+        {
+            public string atributo;
+            public string tipo;
+            public Atrib(string atributo, string tipo)
+            {
+                this.atributo = atributo;
+                this.tipo = tipo;
+            }
+        }
         private Tabla tablas;
         private Atributo atributos;
         private Restricciones restricciones;
         private List<Token> tokens;
         public List<Token> dml;
-        public List<bool> isSub;
-        public List<Token> atrib, tables, alias,compare,exist;
+        public List<Atrib> comparar;
+        public List<Alias> aliases;
+        public List<Token> atrib, suAtrib, tables, suTable, exist;
+        List<string> data;
         public bool isComp, subQuery;
+        public List<Token> errores;
         public Semantic(List<Token> tokens)
         {
             this.tokens = tokens;
@@ -24,10 +48,12 @@ namespace SQL_Escaner
             restricciones = new Restricciones();
             atrib = new List<Token>();
             tables = new List<Token>();
-            alias = new List<Token>();
-            compare = new List<Token>();
+            comparar = new List<Atrib>();
+            aliases = new List<Alias>();
             exist = new List<Token>();
-            isSub = new List<bool>();
+            suAtrib = new List<Token>();
+            suTable = new List<Token>();
+            data = new List<string>();
         }
         public void def()
         {
@@ -45,32 +71,41 @@ namespace SQL_Escaner
             return -1;
         }
 
+        public void excecuteWhen(int x, int k)
+        {
+            if ((x == 310 && (k == 12 || k == 53 || k == 199)))
+            {
+
+                Console.WriteLine("AJA");
+                Token err = checkSelect();
+                if (err != null)
+                {
+                    errores.Add(err);
+                }
+            }
+        }
         public void type(int x)
         {
             if (x == 10)
             {
                 //tables.Clear();
                 atrib.Clear();
-                compare.Clear();
                 exist.Clear();
+                isComp = false;
+                data.Clear();
             }
-            if(x==14 || x == 15)
-            {
-                subQuery = false;
-            }
-
             if (x == 12)
             {
-                subQuery = false;
                 isComp = true;
             }
             if (x == 13)
             {
+                suTable.Clear();
                 subQuery = true;
                 isComp = false;
             }
-           
-                
+            if (x == 53)
+                subQuery = false;
 
         }
         public void fill()
@@ -78,7 +113,7 @@ namespace SQL_Escaner
             for (int i = 0; i < tokens.Count; i++)
             {
                 //Tablas
-                if(tokens[i].Codigo == 17)
+                if (tokens[i].Codigo == 17)
                 {
                     string nombre = tokens[i + 1].Dato;
                     if (!tablas.Nombre.Contains(nombre))
@@ -96,7 +131,7 @@ namespace SQL_Escaner
                     tablas.Atributos[tablaPos]++;
                     atributos.Nombre.Add(tokens[i - 1].Dato);
                     atributos.Tipo.Add(tokens[i].Dato);
-                    atributos.Longitud.Add(int.Parse(tokens[i+2].Dato));
+                    atributos.Longitud.Add(int.Parse(tokens[i + 2].Dato));
                     atributos.Tabla.Add(tablaPos);
                     if (tokens[i + 4].Codigo == 20)
                         atributos.Not_null.Add(true);
@@ -111,7 +146,7 @@ namespace SQL_Escaner
                     restricciones.Nombre.Add(tokens[i + 1].Dato);
                     if (tokens[i + 2].Codigo == 24)
                     {
-                        Console.WriteLine("T: " + tablaPos + " AT: " + tokens[i + 5].Dato + " F: " + findKey(tablaPos, tokens[i + 5].Dato));
+                        //Console.WriteLine("T: " + tablaPos + " AT: " + tokens[i + 5].Dato + " F: " + findKey(tablaPos, tokens[i + 5].Dato));
                         restricciones.Atributo_asoc.Add(findKey(tablaPos, tokens[i + 5].Dato));
                         restricciones.Tabla.Add(-1);
                         restricciones.Tipo.Add(1);
@@ -125,24 +160,28 @@ namespace SQL_Escaner
 
                     }
                 }
-                if(tokens[i].Codigo == 26)
+                if (tokens[i].Codigo == 26)
                 {
                     tablaPos = tablas.Nombre.IndexOf(tokens[i + 1].Dato);
                     restricciones.Tabla.Add(tablaPos);
-                    restricciones.Atributo.Add(findKey(tablaPos,tokens[i+3].Dato));
+                    restricciones.Atributo.Add(findKey(tablaPos, tokens[i + 3].Dato));
                 }
             }
         }
-  
-        public Token validarAtributo(Token item)
-        {
-            //Console.WriteLine(tables.Count());
 
+        public Token existAtrib(Token item)
+        {
+            Token dot = dml[dml.IndexOf(item) + 1];
             if (!isComp)
             {
-                if (atributos.Nombre.Contains(item.Dato.ToUpper()))
+                if (atributos.Nombre.Contains(item.Dato))
                 {
-                    atrib.Add(item);
+
+                    if (atributos.Nombre.Contains(item.Dato))
+                    {
+                        atrib.Add(item);
+                    }
+
                     return null;
                 }
                 else
@@ -150,51 +189,49 @@ namespace SQL_Escaner
                     return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
                 }
             }
-            else
+            else if(dot.Dato != ".")
             {
-                if(tables.Count == 1)
+                if (!subQuery)
                 {
-                    int indexTable = tablas.Nombre.IndexOf(tables[0].Dato);
-                    if (findKey(indexTable, item.Dato) != -1)
-                    {
-                        compare.Add(item);
-                        return null;
-                    }
-                    return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
+                    Console.WriteLine("NO SUB");
+
+                    return atribInTable(item,tables);
                 }
-                else if(tables.Count>1)
+                else
                 {
-                   /* for (int i = 0; i < tables.Count; i++)
-                    {
-                        Console.WriteLine( "#" + (i+1) +"  T: " + tables[i].Dato + " SUB: " + isSub[i]);
-                    }*/
-                    /*Token ambiguo = null;
-                    if (!subQuery)
-                        ambiguo = ambiguedad();
-
-                    return (ambiguo != null) ? ambiguo : perteneceA();
-                    */
-                    return (ambiguedad() != null) ? ambiguedad() : perteneceA();
-
+                    Console.WriteLine("SUB");
+                    return atribInTable(item,suTable);
                 }
+
             }
             return null;
+        }
+
+        public Token atribInTable(Token atributo, List<Token> tables)
+        {
+            int tableIndex = tablas.Nombre.IndexOf(tables[0].Dato);
+            Console.WriteLine(tables[0].Dato);
+            if (findKey(tableIndex, atributo.Dato) != -1)
+                return null;
+
+            return new Token("El nombre del atributo '" + atributo.Dato + "' no es válido", 311, atributo.Linea, 3);
+        }
+        public Token validarAtributo(Token item)
+        {
+
+            return existAtrib(item);
         }
 
         public Token validarTabla(Token item)
         {
             if (tablas.Nombre.Contains(item.Dato.ToUpper()))
             {
-                //Console.WriteLine(item.Dato);
                 if (subQuery)
-                {
-                    isSub.Add(true);
-                }
+                    suTable.Add(item);
                 else
-                    isSub.Add(false);
+                    tables.Add(item);
 
-                tables.Add(item);
-                return null;
+                return ambiguedad(item);
             }
             else
             {
@@ -202,89 +239,129 @@ namespace SQL_Escaner
             }
 
         }
+        private bool tableIsDeclared(Token table)
+        {
+            foreach (Token t in tables)
+            {
+                if (t.Dato.Equals(table.Dato))
+                    return true;
+            }
 
+            return false;
+        }
         public Token validaTablaAtributo(Token item)
         {
-                
-                Token table = dml[dml.IndexOf(item) - 2];
-                if (tablas.Nombre.Contains(table.Dato))
+            Token table = dml[dml.IndexOf(item) - 2];
+            string tableName = tableAlias(table);
+            Console.WriteLine("I< " + item.Dato);
+            if (tableName != null)
+                table.Dato = tableName;
+            Console.WriteLine("I> " + table.Dato);
+            if ((tablas.Nombre.Contains(table.Dato)) && tableIsDeclared(table))
+            {
+                int tableIndex = tablas.Nombre.IndexOf(table.Dato);
+                if (findKey(tableIndex, item.Dato.ToUpper()) != -1)
                 {
-                    int tableIndex = tablas.Nombre.IndexOf(table.Dato);
-                    //Console.WriteLine("AV " + tableIndex + " " + tablas.Nombre.IndexOf(table.Dato));
+                    //comparar.Add(item);
+                    return null;
+                }
 
-                    if (findKey(tableIndex, item.Dato.ToUpper()) != -1)
+                return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
+            }
+            else
+            {
+                return new Token("El identificador '" + table.Dato + "." + item.Dato + "' no es válido", 315, item.Linea, 3);
+            }
+
+        }
+        public string tableAlias(Token alias)
+        {
+            foreach (Alias a in aliases)
+                if (alias.Dato.Equals(a.alias))
+                    return a.table;
+
+            return null;
+
+        }
+
+        public Token compararTipos(Token item)
+        {
+
+            return null;
+        }
+        public Token checkSelect()
+        {
+            if (!subQuery)
+            {
+                foreach (Token tabla in tables)
+                {
+                    ///Console.WriteLine("T " + tabla.Dato);
+                    foreach (Token item in atrib)
                     {
-                        compare.Add(item);
-                        return null;
-                    }
+                        if (!item.Dato.Equals(" "))
+                        {
+                            if (findKey(tablas.Nombre.IndexOf(tabla.Dato), item.Dato.ToUpper()) != -1)
+                            {
+                                item.Dato = " ";
+                            }
 
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Token tabla in suTable)
+                {
+                    Console.WriteLine("T " + tabla.Dato);
+                    foreach (Token item in suAtrib)
+                    {
+                        if (!item.Dato.Equals(" "))
+                        {
+                            if (findKey(tablas.Nombre.IndexOf(tabla.Dato), item.Dato.ToUpper()) != -1)
+                            {
+                                item.Dato = " ";
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            foreach (Token item in atrib)
+            {
+                if (!item.Dato.Equals(" "))
+                {
+                    Console.WriteLine("> " + item.Dato);
                     return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
                 }
-                else
-                {
-                    return new Token("El identificador '" + table.Dato + "." + item.Dato + "' no es válido", 315, item.Linea, 3);
-                }
+            }
+            return null;
         }
-  
-        public Token perteneceA()
+        public Token ambiguedad(Token tabla)
         {
-            foreach (Token tabla in tables)
+            if (!subQuery)
             {
-               // Console.WriteLine("T: " + tabla.Dato);
-                foreach (Token item in atrib)
+                int tableIndex = tablas.Nombre.IndexOf(tabla.Dato);
+                foreach (Token a in atrib)
                 {
-                    if (!item.Dato.Equals(" "))
+                    if (findKey(tableIndex, a.Dato.ToUpper()) != -1)
                     {
-                        if (findKey(tablas.Nombre.IndexOf(tabla.Dato), item.Dato) != -1)
-                        {
-                            item.Dato = " ";
-                            continue;
-                         
-                        }
+                        if (!data.Contains(a.Dato.ToUpper()))
+                            data.Add(a.Dato.ToUpper());
                         else
-                           return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
+                            return new Token("El nombre del atributo '" + a.Dato + "' es ambigüo", 312, a.Linea, 3);
                     }
-
                 }
-                
-                   
             }
-          
-    
+
             return null;
         }
-        public Token ambiguedad()
+        public void alias(Token token)
         {
-            List<string> data = new List<string>();
-
-            for (int i = 0; i < tables.Count; i++)
-            {
-                if (isSub[i])
-                    continue;
-
-                    int tableIndex = tablas.Nombre.IndexOf(tables[i].Dato);
-                    for (int j = 0; j < atrib.Count; j++)
-                    {
-                
-                       
-                        if (findKey(tableIndex, atrib[j].Dato) != -1)
-                        {
-
-                            if (!data.Contains(atrib[j].Dato))
-                            {
-                                data.Add(atrib[j].Dato);
-                                exist.Add(atrib[j]);
-                            }
-                            else
-                                return new Token("El nombre del atributo '" + atrib[j].Dato + "' es ambigüo", 312, atrib[j].Linea, 3);
-                        }
-
-                    }
-                
-            }
-            return null;
+            Token table = dml[dml.IndexOf(token) - 1];
+            aliases.Add(new Alias(token.Dato, table.Dato));
         }
-
         public Token analyze(int rule, Token token)
         {
             switch (rule)
@@ -293,20 +370,22 @@ namespace SQL_Escaner
                     return validarAtributo(token);
                 case 701:
                     return validarTabla(token);
+                case 702:
+                    alias(token);
+                    return null;
                 case 703:
                     return validaTablaAtributo(token);
-
-
+                case 704:
+                    return null;
                 default:
                     return null;
             }
-           
+
         }
         public void print()
         {
             try
             {
-                this.fill();
                 Console.WriteLine("<----- TABLAS ----->");
                 tablas.print();
                 Console.WriteLine("<----- ATRIBUTOS ----->");
@@ -314,11 +393,11 @@ namespace SQL_Escaner
                 Console.WriteLine("<----- RESTRICCIONES ----->");
                 restricciones.print();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.Write("Error");
             }
-           
+
 
         }
     }
