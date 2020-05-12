@@ -217,6 +217,7 @@ namespace SQL_Escaner
             else if (Regex.IsMatch(str.ToUpper(), @"^PRINT$")) { return new Token(str, 37, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^END$")) { return new Token(str, 38, line, 1); }
             else if (Regex.IsMatch(str.ToUpper(), @"^ELSE$")) { return new Token(str, 39, line, 1); }
+            else if (Regex.IsMatch(str.ToUpper(), @"^DISTINCT$")) { return new Token(str, 40, line, 1); }
             else if (Regex.IsMatch(str, @"^\,$")) { return new Token(str, 50, line, 5); } //DELIMITADORES
             else if (Regex.IsMatch(str, @"^\.$")) { return new Token(str, 51, line, 5); }
             else if (Regex.IsMatch(str, @"^\($")) { return new Token(str, 52, line, 5); }

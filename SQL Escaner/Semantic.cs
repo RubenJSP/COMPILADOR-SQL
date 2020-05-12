@@ -285,20 +285,39 @@ namespace SQL_Escaner
             int tableIndex = tablas.Nombre.IndexOf(table.Dato);
             int itemIndex = findKey(tableIndex,item.Dato);
             if (itemIndex != -1)
-                return atributos.Tipo[itemIndex];
+                return (atributos.Tipo[itemIndex].Equals("NUMERIC")) ? "INT":"CHAR";
 
             return null;
         }
 
         public Token compararTipos(Token item)
         {
-            bool isLeftTable = (dml[dml.IndexOf(item) - 2].Dato == ".") ? true : false;
+            bool isRightTable = (tablas.Nombre.Contains(dml[dml.IndexOf(item) + 1].Dato)) ? true : false;
             Token table = dml[dml.IndexOf(item) + 1];
             Token right = (tablas.Nombre.Contains(table.Dato)) ? dml[dml.IndexOf(item) + 3] : table;
             Token left = dml[dml.IndexOf(item) - 1];
-            string leftType = getType(dml[dml.IndexOf(item) - 3],left);
-            Console.WriteLine(left.Dato + "( " + leftType + ") " + item.Dato + " " + right.Dato + " " + isLeftTable);
+            string leftType = getType(dml[dml.IndexOf(item) - 3], left);
+            string rightType = null;
+            if (isRightTable)
+            {
+                rightType = getType(dml[dml.IndexOf(item) + 1], right);
+                if (rightType == null)
+                    return null;
+            }
+            else
+            {
+                if (right.Codigo == 54)
+                    rightType = "CHAR";
+                else if (right.Codigo == 61)
+                    rightType = "INT";
+                else
+                    return null;
+            }
+            Console.WriteLine(left.Dato + "(" + leftType + ") " + item.Dato + " " + right.Dato + " (" + rightType + ")");
 
+            if (!leftType.Equals(rightType))
+                return new Token("Error de conversión al convertir el valor del atributo " +  left.Dato + " del tipo " +  leftType  + " a tipo de dato " + rightType,313,left.Linea,3);
+            
             return null;
         }
         public Token checkSelect()

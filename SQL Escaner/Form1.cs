@@ -15,6 +15,7 @@ namespace SQL_Escaner
     
     public partial class Form1 : MetroFramework.Forms.MetroForm
     {
+        DataTable dt;
         Semantic tablasSemanticas;
         List<Token> tokens;
         string conection = "Data Source=GECKO;Initial Catalog=INSCRITOS;Integrated Security=True";
@@ -92,7 +93,19 @@ namespace SQL_Escaner
 
         }
 
+        public void formatQueryTable()
+        {
+            foreach (DataGridViewColumn col in queryGrid.Columns)
+            {
+                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                col.HeaderCell.Style.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
+                col.HeaderCell.Style.ForeColor = Color.White;
 
+                col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            }
+
+            queryGrid.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
            // this.richTextBox1.Text += "";
@@ -106,8 +119,8 @@ namespace SQL_Escaner
 
                 col.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
             }
-
             gridErr.RowsDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
 
         }
 
@@ -158,23 +171,30 @@ namespace SQL_Escaner
                 gridErr.Rows.Add("1", "100", "Sin error");
                 gridErr.Rows.Add("2", "200", "Sin error");
                 gridErr.Rows.Add("3", "300", "Sin error");
-                /*SqlConnection conectar = new SqlConnection(conection);
+                SqlConnection conectar = new SqlConnection(conection);
+                SqlDataAdapter adapter;
+                 dt = new DataTable();
                 conectar.Open();
                 if(conectar.State == System.Data.ConnectionState.Open)
                 {
                     try
                     {
                         string query = richTextBox1.Text;
-                        SqlCommand cmd = new SqlCommand(query, conectar);
-                        cmd.ExecuteNonQuery();
-                        Console.WriteLine("Listo");
+                        adapter = new SqlDataAdapter(query,conectar);
+                        adapter.Fill(dt);
+                        queryGrid.DataSource = dt;
+                        formatQueryTable();
+                        //SqlCommand cmd = new SqlCommand(query, conectar);
+                        //cmd.ExecuteNonQuery();
+
                     }
                     catch(Exception ex)
                     {
                         Console.WriteLine("Error: " + ex);
 
                     }
-                }*/
+                }
+                conectar.Close();
 
             }
             else
@@ -215,7 +235,8 @@ namespace SQL_Escaner
         private void button2_Click(object sender, EventArgs e)
         {
             gridErr.Rows.Clear();
-
+            dt = null;
+            queryGrid.DataSource = dt;
             richTextBox1.Text = "";
         }
 
