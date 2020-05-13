@@ -70,20 +70,6 @@ namespace SQL_Escaner
 
             return -1;
         }
-
-        public void excecuteWhen(int x, int k)
-        {
-            if ((x == 310 && (k == 12 || k == 53 || k == 199)))
-            {
-
-                Console.WriteLine("AJA");
-                Token err = checkSelect();
-                if (err != null)
-                {
-                    errores.Add(err);
-                }
-            }
-        }
         public void type(int x)
         {
             if (x == 10)
@@ -193,13 +179,11 @@ namespace SQL_Escaner
             {
                 if (!subQuery)
                 {
-                    Console.WriteLine("NO SUB");
 
                     return atribInTable(item,tables);
                 }
                 else
                 {
-                    Console.WriteLine("SUB");
                     return atribInTable(item,suTable);
                 }
 
@@ -210,7 +194,6 @@ namespace SQL_Escaner
         public Token atribInTable(Token atributo, List<Token> tables)
         {
             int tableIndex = tablas.Nombre.IndexOf(tables[0].Dato);
-            Console.WriteLine(tables[0].Dato);
             if (findKey(tableIndex, atributo.Dato) != -1)
                 return null;
 
@@ -296,7 +279,13 @@ namespace SQL_Escaner
             Token table = dml[dml.IndexOf(item) + 1];
             Token right = (tablas.Nombre.Contains(table.Dato)) ? dml[dml.IndexOf(item) + 3] : table;
             Token left = dml[dml.IndexOf(item) - 1];
-            string leftType = getType(dml[dml.IndexOf(item) - 3], left);
+            Token leftTable = null;
+            if (!subQuery)
+                leftTable = (tables.Count < 2) ? tables[0]: dml[dml.IndexOf(item) - 3];
+            else
+                leftTable = (suTable.Count < 2) ? suTable[0] : dml[dml.IndexOf(item) - 3];
+
+            string leftType = getType(leftTable, left);
             string rightType = null;
             if (isRightTable)
             {
@@ -313,60 +302,9 @@ namespace SQL_Escaner
                 else
                     return null;
             }
-            Console.WriteLine(left.Dato + "(" + leftType + ") " + item.Dato + " " + right.Dato + " (" + rightType + ")");
-
             if (!leftType.Equals(rightType))
                 return new Token("Error de conversión al convertir el valor del atributo " +  left.Dato + " del tipo " +  leftType  + " a tipo de dato " + rightType,313,left.Linea,3);
             
-            return null;
-        }
-        public Token checkSelect()
-        {
-            if (!subQuery)
-            {
-                foreach (Token tabla in tables)
-                {
-                    ///Console.WriteLine("T " + tabla.Dato);
-                    foreach (Token item in atrib)
-                    {
-                        if (!item.Dato.Equals(" "))
-                        {
-                            if (findKey(tablas.Nombre.IndexOf(tabla.Dato), item.Dato.ToUpper()) != -1)
-                            {
-                                item.Dato = " ";
-                            }
-
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (Token tabla in suTable)
-                {
-                    Console.WriteLine("T " + tabla.Dato);
-                    foreach (Token item in suAtrib)
-                    {
-                        if (!item.Dato.Equals(" "))
-                        {
-                            if (findKey(tablas.Nombre.IndexOf(tabla.Dato), item.Dato.ToUpper()) != -1)
-                            {
-                                item.Dato = " ";
-                            }
-
-                        }
-
-                    }
-                }
-            }
-            foreach (Token item in atrib)
-            {
-                if (!item.Dato.Equals(" "))
-                {
-                    Console.WriteLine("> " + item.Dato);
-                    return new Token("El nombre del atributo '" + item.Dato + "' no es válido", 311, item.Linea, 3);
-                }
-            }
             return null;
         }
         public Token ambiguedad(Token tabla)
@@ -424,9 +362,8 @@ namespace SQL_Escaner
                 Console.WriteLine("<----- RESTRICCIONES ----->");
                 restricciones.print();
             }
-            catch (Exception e)
+            catch
             {
-                Console.Write("Error");
             }
 
 
